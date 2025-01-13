@@ -4,3 +4,5 @@ TradeBot (Package)/obj/
 TradeBot/bin/
 TradeBot/obj/project.assets.json
 TradeBot/obj/
+WebSocket/bin/
+WebSocket/obj/

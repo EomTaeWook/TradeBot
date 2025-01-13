@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "TradeBot (Package)", "TradeBot (Package)\TradeBot (Package).wapproj", "{9EFF0A19-063D-4F88-ABD5-7D10F140F221}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeBot", "TradeBot\TradeBot.csproj", "{7C75827C-4E6B-480D-8A3B-1E68B743CFBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dignus.WebSockets", "WebSocket\Dignus.WebSockets.csproj", "{797B3DCA-9747-4255-AA13-3BBD890334AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,18 @@ Global
 		{7C75827C-4E6B-480D-8A3B-1E68B743CFBF}.Release|x64.Build.0 = Release|x64
 		{7C75827C-4E6B-480D-8A3B-1E68B743CFBF}.Release|x86.ActiveCfg = Release|x86
 		{7C75827C-4E6B-480D-8A3B-1E68B743CFBF}.Release|x86.Build.0 = Release|x86
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|x64.Build.0 = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Debug|x86.Build.0 = Debug|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|ARM64.Build.0 = Release|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|x64.ActiveCfg = Release|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|x64.Build.0 = Release|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|x86.ActiveCfg = Release|Any CPU
+		{797B3DCA-9747-4255-AA13-3BBD890334AD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
