@@ -1,20 +1,78 @@
-﻿using System.Net.WebSockets;
+﻿using Dignus.Collections;
+using Dignus.WebSockets.Interfaces;
+using System.Net.WebSockets;
 
 namespace Dignus.WebSockets
 {
-    public class Session
+    internal class Session : ISession
     {
-        private ClientWebSocket _webSocket;
+        private readonly IPacketDeserializer _packetDeserializer;
+
+        private WebSocket _webSocket;
         private int _disposed = 0;
-        public Session()
+
+        private int _bufferSize = 4096;
+        private Action<Session> _disposedCallback;
+
+        private readonly ArrayQueue<byte> _receivedBuffer = [];
+        private readonly ArrayQueue<ISessionComponent> _persistentSessionComponents = [];
+        public Session(IPacketDeserializer packetDeserializer,
+            ICollection<ISessionComponent> persistentSessionComponents)
         {
+            _packetDeserializer = packetDeserializer;
+            foreach (var component in persistentSessionComponents)
+            {
+                _persistentSessionComponents.Add(component);
+            }
         }
-        public void Send(ArraySegment<byte> bytes, WebSocketMessageType webSocketMessageType)
+        public void SetSocket(WebSocket webSocket, SocketOption socketOption)
         {
-            _webSocket.SendAsync(bytes, webSocketMessageType, true, CancellationToken.None);
+            _webSocket = webSocket;
+            _bufferSize = socketOption.BufferSize;
+
+            foreach (var component in _persistentSessionComponents)
+            {
+                component.SetSession(this);
+            }
+            _disposed = 0;
+        }
+        public void SetDisposedCallback(Action<Session> disposedCallback)
+        {
+            _disposedCallback = disposedCallback;
+        }
+        private async Task BeginReceiveAsync()
+        {
+            byte[] buffer = new byte[_bufferSize];
+            var receive = await _webSocket.ReceiveAsync(buffer, CancellationToken.None);
+
+            _receivedBuffer.AddRange(new ArraySegment<byte>(buffer, 0, receive.Count));
+            if (receive.EndOfMessage == false)
+            {
+                _ = BeginReceiveAsync();
+                return;
+            }
+            var bodyBytes = _receivedBuffer.Read(_receivedBuffer.LongCount);
+            _packetDeserializer.Deserialize(bodyBytes);
+            _ = BeginReceiveAsync();
+        }
+        public Task SendAsync(byte[] bytes, WebSocketMessageType webSocketMessageType)
+        {
+            return _webSocket.SendAsync(bytes, webSocketMessageType, true, CancellationToken.None);
+        }
+        public Task SendAsync(ArraySegment<byte> bytes, WebSocketMessageType webSocketMessageType)
+        {
+            return _webSocket.SendAsync(bytes, webSocketMessageType, true, CancellationToken.None);
+        }
+        public Task SendAsync(byte[] bytes, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken)
+        {
+            return _webSocket.SendAsync(bytes, webSocketMessageType, true, cancellationToken);
+        }
+        public Task SendAsync(ArraySegment<byte> bytes, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken)
+        {
+            return _webSocket.SendAsync(bytes, webSocketMessageType, true, cancellationToken);
         }
 
-        public void SetClientWebSocket(ClientWebSocket webSocket)
+        internal void SetClientWebSocket(ClientWebSocket webSocket)
         {
             _webSocket = webSocket;
         }
@@ -38,5 +96,19 @@ namespace Dignus.WebSockets
             }
         }
 
+        public void AddSessionComponent(ISessionComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveSessionComponent(ISessionComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        public WebSocket GetWebSocket()
+        {
+            return _webSocket;
+        }
     }
 }

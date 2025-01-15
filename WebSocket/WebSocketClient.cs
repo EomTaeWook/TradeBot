@@ -1,11 +1,22 @@
-﻿using System.Net.WebSockets;
+﻿using Dignus.WebSockets.Interfaces;
+using System.Net.WebSockets;
 
 namespace Dignus.WebSockets
 {
-    public class WebSocketClientBase
+    public abstract class WebSocketClientBase
     {
+        protected abstract void OnConnected(ISession session);
+        protected abstract void OnDisconnected(ISession session);
+
         private int _connected = 0;
         private Session _session;
+        private readonly SerializerFactoryDelegate _serializerFactoryDelegate;
+        private readonly SocketOption _socketOption;
+        public WebSocketClientBase(SessionConfiguration sessionConfiguration)
+        {
+            _serializerFactoryDelegate = sessionConfiguration.SerializerFactoryDelegate;
+            _socketOption = sessionConfiguration.SocketOption;
+        }
         public async Task ConnectAsync(string uriString, int timeout = 5000)
         {
             if (Interlocked.CompareExchange(ref _connected, 1, 0) != 0)
@@ -26,11 +37,41 @@ namespace Dignus.WebSockets
                 throw;
             }
 
-            _session.SetClientWebSocket(clientWebSocket);
+            _session = CreateSession(clientWebSocket);
         }
-        public void Send()
+        private void Disconnected(ISession session)
         {
+            OnDisconnected(session);
+            Close();
+        }
+        private Session CreateSession(WebSocket webSocket)
+        {
+            var sessionInitializationParams = _serializerFactoryDelegate();
 
+            if (sessionInitializationParams.Item1 == null)
+            {
+                throw new ArgumentNullException(nameof(IPacketDeserializer));
+            }
+            var sessionComponents = sessionInitializationParams.Item2;
+            if (sessionComponents == null)
+            {
+                sessionComponents = Array.Empty<ISessionComponent>();
+            }
+            var session = new Session(sessionInitializationParams.Item1,
+                sessionComponents);
+
+            session.SetSocket(webSocket, _socketOption);
+            _session.SetDisposedCallback(Disconnected);
+
+            return session;
+        }
+        public Task SendAsync(byte[] bytes, WebSocketMessageType webSocketMessageType)
+        {
+            return SendAsync(bytes, webSocketMessageType, CancellationToken.None);
+        }
+        public Task SendAsync(byte[] bytes, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken)
+        {
+            return _session.SendAsync(bytes, webSocketMessageType, cancellationToken);
         }
 
         public void Close()
@@ -45,7 +86,5 @@ namespace Dignus.WebSockets
             }
             _connected = 0;
         }
-
     }
-
 }
